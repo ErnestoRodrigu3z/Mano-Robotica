@@ -12,6 +12,24 @@ from pyfirmata import Arduino, SERVO
 from scipy.interpolate import interp1d
 import numpy as np
 Y = [0, 180] #Valores para servo
+port = "COM5"
+board = Arduino (port)
+
+#Declaracion del servo para dedo pulgar
+pinPulgar = 5
+board.digital[pinPulgar].mode = SERVO
+#Declaracion del servo para dedo indice
+pinIndice = 6
+board.digital[pinIndice].mode = SERVO
+#Declaracion del servo para dedo medio
+pinMedio = 9
+board.digital[pinMedio].mode = SERVO
+#Declaracion del servo para dedo anular
+pinAnular = 10
+board.digital[pinAnular].mode = SERVO
+#Declaracion del servo para dedo menhique
+pinMenhique = 11
+board.digital[pinMenhique].mode = SERVO
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -36,28 +54,38 @@ def detect_finger_down(hand_landmarks, puntoMayor, puntoMenor):
     
     d_base_index = calculate_distance(xBaseMenor, yBaseMenor, x_index, y_index)
 
-    return d_base_index
+    return finger_down
 # Funciones para Dedo Pulgar
+def dedoPulgar (pin, angulo):
+  board.digital[pin].write(angulo)
 def interpolacionPulgar (x,y,z):
     valorServoPulgar = interp1d(x, y)
     return valorServoPulgar (z)
 
 # Funciones para Dedo Indice
+def dedoIndice (pin, angulo):
+  board.digital[pin].write(angulo)
 def interpolacionIndice (x,y,z):
     valorServoIndice = interp1d(x, y)
     return valorServoIndice (z) 
 
 # Funciones para Dedo Medio
+def dedoMedio (pin, angulo):
+  board.digital[pin].write(angulo)
 def interpolacionMedio (x,y,z):
     valorServoMedio = interp1d(x, y)
     return valorServoMedio (z)
 
 # Funciones para Dedo anular
+def dedoAnular (pin, angulo):
+  board.digital[pin].write(angulo)
 def interpolacionAnular (x,y,z):
     valorServoAnular = interp1d(x, y)
     return valorServoAnular (z)
 
 # Funciones para Dedo menhique
+def dedoMenhique (pin, angulo):
+  board.digital[pin].write(angulo)
 def interpolacionMenhique (x,y,z):
     valorServoMenhique = interp1d(x, y)    
     return valorServoMenhique (z)
@@ -102,31 +130,35 @@ with mp_hands.Hands(
         for landmarks in hand_landmarks.landmark:
           handLandmarks.append([landmarks.x, landmarks.y])        
         #Obtencion de distancia del dedo pulgar
-        xPulgar = [-2,1] 
+        xPulgar = [0.5,0.6] 
         distanciaPulgar = handLandmarks[4][0] - handLandmarks[3][0]
         valorPulgar = interpolacionPulgar (xPulgar, Y, distanciaPulgar)
+        dedoPulgar(pinPulgar, valorPulgar)
 
         #Obtencion de distancia del dedo indice        
-        xIndice = [-2,1]
+        xIndice = [0.5,0.6]
         distanciaIndice = handLandmarks[8][1] - handLandmarks[6][1]
         valorIndice = interpolacionIndice(xIndice, Y, distanciaIndice)
+        dedoIndice(pinIndice, valorIndice)
 
         #Obtencion de distancia del dedo medio
-        xMedio = [-2,1]
+        xMedio = [0.5,0.6]
         distanciaMedio = handLandmarks[12][1] - handLandmarks[10][1]
         valorMedio = interpolacionMedio(xMedio, Y, distanciaMedio)
+        dedoMedio(pinMedio, valorMedio)
+
         #Obtencion de distancia del dedo anular
-        xAnular = [-2,1]
+        xAnular = [0.5,0.6]
         distanciaAnular = handLandmarks[16][1] - handLandmarks[14][1]
         valorAnular = interpolacionAnular (xAnular, Y, distanciaAnular)
+        dedoAnular(pinAnular, valorAnular)
 
         #Obtencion de distancia del dedo menhique
-        xMenhique = [-2,1]
+        xMenhique = [0.5,0.6]
         distanciaMenhique = handLandmarks[20][1] - handLandmarks[18][1]
         valorMenhique = interpolacionMenhique (xMenhique, Y, distanciaMenhique)
+        dedoMenhique(pinMenhique, valorMenhique)
 
-        distancia = detect_finger_down(hand_landmarks, 4, 3)
-        print (distancia)
         # Dibuja los dedos en la pantalla
         mp_drawing.draw_landmarks(
             image,

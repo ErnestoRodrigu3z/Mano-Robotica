@@ -103,7 +103,8 @@ def main():
         #Una vez que obtengamos la imagen la enviaremos
         frame = detector.encontrarmanos(frame)
         lista, bbox = detector.encontrarposicion(frame)
-        dedos = detector.dedosarriba()
+        manosinfo, cuadro = detector.encontrarposicion(frame, dibujar=False)
+        #dedos = detector.dedosarriba()
         #if len(lista) != 0:
             #print(lista[4])
         # ----------------------------------------Mostramos los fps ---------------------------------------
@@ -115,6 +116,7 @@ def main():
 
         cv2.imshow("Manos", frame)
         k = cv2.waitKey(1)
+        print (manosinfo)
 
         if k == 27:
             break

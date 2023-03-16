@@ -16,16 +16,12 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_hands = mp.solutions.hands
 fingerCount = 0
 #Declaracion de variables para antirebote de datos
-banderaPulgarArriba = False
-banderaPulgarAbajo = False
-banderaIndiceArriba = False
-banderaIndiceAbajo = False
-banderaMedioArriba = False 
-banderaMedioAbajo = False
-banderaAnularArriba = False
-banderaAnularAbajo = False
-banderaMenhiqueArriba = False
-banderaMenhiqueAbajo = False
+valorNuevo = 'A1B1C1D1E1'
+valorActual = 'A0B0C0D0E0'
+valoresDedos = [1,1,1,1,1] 
+def manoLevantada ():
+
+   return    
 # For webcam input:
 cap = cv2.VideoCapture(0)
 with mp_hands.Hands(
@@ -47,8 +43,7 @@ with mp_hands.Hands(
 
     # Draw the hand annotations on the image.
     image.flags.writeable = True
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)    
     # Initially set finger count to 0 for each cap    
 
     if results.multi_hand_landmarks:
@@ -69,69 +64,34 @@ with mp_hands.Hands(
         #   considered raised.
         # Thumb: TIP x position must be greater or lower than IP x position, 
         #   deppeding on hand label.
-        if (handLabel == "Left" and handLandmarks[4][0] > handLandmarks[3][0]) and banderaPulgarArriba == False:
-          Arduino.write(b'1')
-          fingerCount += 1
-          banderaPulgarArriba = True
-          banderaPulgarAbajo = False
-        elif (handLabel == "Left" and handLandmarks[4][0] < handLandmarks[3][0]) and banderaPulgarAbajo == False:
-          Arduino.write(b'2')
-          fingerCount -= 1
-          banderaPulgarArriba = False
-          banderaPulgarAbajo = True           
-        if (handLabel == "Right" and handLandmarks[4][0] < handLandmarks[3][0]) and banderaPulgarArriba == False:
-          Arduino.write(b'1')
-          fingerCount += 1
-          banderaPulgarArriba = True
-          banderaPulgarAbajo = False
-        elif (handLabel == "Right" and handLandmarks[4][0] > handLandmarks[3][0]) and banderaPulgarAbajo == False:
-          Arduino.write(b'2')
-          fingerCount -= 1
-          banderaPulgarArriba = False
-          banderaPulgarAbajo = True
+        if ((handLabel == "Left" and handLandmarks[4][0] > handLandmarks[3][0]) or (handLabel == "Right" and handLandmarks[4][0] < handLandmarks[3][0])):
+           valoresDedos[0] = 1
+        else:
+           valoresDedos [0] = 0
+
         # Other fingers: TIP y position must be lower than PIP y position, 
         #   as image origin is in the upper left corner.
-        if (handLandmarks[8][1] < handLandmarks[6][1]) and banderaIndiceArriba == False:       #Index finger
-            fingerCount += 1          
-            Arduino.write(b'A')
-            banderaIndiceArriba = True
-            banderaIndiceAbajo = False
-        if (handLandmarks [8][1] > handLandmarks [6][1]) and banderaIndiceAbajo == False:
-            fingerCount -= 1
-            Arduino.write(b'B')
-            banderaIndiceArriba = False
-            banderaIndiceAbajo = True
-        if (handLandmarks[12][1] < handLandmarks[10][1]) and banderaMedioArriba == False:     #Middle finger
-            Arduino.write(b'C')
-            fingerCount += 1
-            banderaMedioArriba = True
-            banderaMedioAbajo = False
-        if (handLandmarks[12][1] > handLandmarks[10][1]) and banderaMedioAbajo == False:     #Middle finger
-            Arduino.write(b'D')
-            fingerCount -= 1
-            banderaMedioArriba = False
-            banderaMedioAbajo = True           
-        if (handLandmarks[16][1] < handLandmarks[14][1]) and banderaAnularArriba == False:     #Ring finger
-            Arduino.write(b'E')
-            fingerCount += 1
-            banderaAnularArriba = True
-            banderaAnularAbajo = False
-        if (handLandmarks[16][1] > handLandmarks[14][1]) and banderaAnularAbajo == False:     #Ring finger
-            Arduino.write(b'G')
-            fingerCount -= 1
-            banderaAnularArriba = False
-            banderaAnularAbajo = True                                    
-        if (handLandmarks[20][1] < handLandmarks[18][1]) and banderaMenhiqueArriba == False:     #Pinky
-            Arduino.write (b'J')            
-            fingerCount += 1
-            banderaMenhiqueArriba = True
-            banderaMenhiqueAbajo = False
-        if (handLandmarks[20][1] > handLandmarks[18][1]) and banderaMenhiqueAbajo == False:     #Pinky
-            Arduino.write (b'K')            
-            fingerCount -= 1
-            banderaMenhiqueArriba = False
-            banderaMenhiqueAbajo = True           
-
+        if (handLandmarks[8][1] < handLandmarks[6][1]):       #Index finger       
+            valoresDedos [1] = 1
+        else:
+           valoresDedos [1] = 0          
+        if (handLandmarks[12][1] < handLandmarks[10][1]):     #Middle finger
+           valoresDedos[2] = 1
+        else:
+           valoresDedos [2] = 0
+        if (handLandmarks[16][1] < handLandmarks[14][1]):     #Ring finger
+           valoresDedos [3] = 1
+        else:
+           valoresDedos [3] = 0                                    
+        if (handLandmarks[20][1] < handLandmarks[18][1]):     #Pinky
+           valoresDedos [4] = 1
+        else:
+           valoresDedos [4] = 0                  
+        valorNuevo = 'IA' + str(valoresDedos[0]) + 'B' + str(valoresDedos[1]) + 'C'+ str(valoresDedos[2]) + 'D'+ str(valoresDedos[3]) + 'E' + str(valoresDedos[4]) + ","
+        if (valorActual != valorNuevo):
+            Arduino.write(valorNuevo.encode("ascii"))
+            print (valorNuevo)
+            valorActual = valorNuevo        
         # Draw hand landmarks 
         mp_drawing.draw_landmarks(
             image,
